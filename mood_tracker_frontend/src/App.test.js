@@ -60,8 +60,16 @@ describe("App integration & routing", () => {
     expect(screen.getByText(/daily reminder/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId("nav-profile"));
-    expect(screen.getByText(/bob/i)).toBeInTheDocument();
-    expect(screen.getByTestId("profile-logout")).toBeInTheDocument();
+    // Instead of ambiguous getByText(/bob/i), check for the username within a reliable, specific location
+    // ProfilePage shows username as: <div style=...>{user.name}</div>,
+    // It's the only element inside Card (aside from email).
+    // Use getByTestId for profile-logout to find the parent, then search within
+    const logoutBtn = screen.getByTestId("profile-logout");
+    // Find the parent card, then check within for the username 'bob'
+    const card = logoutBtn.closest("div");
+    // Use 'within' to assert username is present in the card (less risky than global getByText)
+    expect(within(card).getByText("bob")).toBeInTheDocument();
+    expect(logoutBtn).toBeInTheDocument();
   });
 
   test("logout removes user state and shows login view", () => {
