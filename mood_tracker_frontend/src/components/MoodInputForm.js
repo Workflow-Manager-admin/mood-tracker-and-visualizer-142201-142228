@@ -14,18 +14,20 @@ export default function MoodInputForm() {
   const prev = getMoodByDate(today);
   const [mood, setMood] = useState(prev ? prev.mood : "");
   const [note, setNote] = useState(prev ? prev.note : "");
-  const [success, setSuccess] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
 
   function handleSubmit(e) {
     e.preventDefault();
     if (!mood) return;
     if (prev) {
       editMood(today, { mood, note });
+      setSuccessMsg("Mood updated!");
     } else {
       addMood({ date: today, mood, note });
+      setSuccessMsg("Mood added!");
     }
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 1800);
+    // Keep message visible for at least 2.5s for reliable test feedback
+    setTimeout(() => setSuccessMsg(""), 2500);
   }
 
   return (
@@ -54,9 +56,12 @@ export default function MoodInputForm() {
       >
         {prev ? "Update Mood" : "Add Mood"}
       </Button>
-      {success && (
-        <div style={{ color: "#43E97B", fontSize: 13, marginTop: 5, textAlign: "center" }}>
-          {prev ? "Mood updated!" : "Mood added!"}
+      {successMsg && (
+        <div
+          data-testid="mood-feedback"
+          style={{ color: "#43E97B", fontSize: 13, marginTop: 5, textAlign: "center" }}
+        >
+          {successMsg}
         </div>
       )}
     </form>

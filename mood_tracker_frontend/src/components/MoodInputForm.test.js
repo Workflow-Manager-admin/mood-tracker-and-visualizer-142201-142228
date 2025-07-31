@@ -23,8 +23,10 @@ describe("MoodInputForm", () => {
     fireEvent.change(screen.getByTestId("mood-select"), { target: { value: "happy" } });
     fireEvent.change(screen.getByTestId("mood-note-input"), { target: { value: "hello" } });
     fireEvent.click(screen.getByTestId("submit-mood-btn"));
-    // Wait for feedback to appear
-    expect(await screen.findByText(/added/i)).toBeInTheDocument();
+    // Wait for feedback with testid (reliably visible for at least 2.5s)
+    const fb = await screen.findByTestId("mood-feedback");
+    expect(fb).toBeInTheDocument();
+    expect(fb.textContent).toMatch(/added/i);
   });
 
   it("renders 'update mood' if mood exists for today", async () => {
@@ -32,10 +34,11 @@ describe("MoodInputForm", () => {
     // Add mood for today first
     fireEvent.change(screen.getByTestId("mood-select"), { target: { value: "sad" } });
     fireEvent.click(screen.getByTestId("submit-mood-btn"));
-    // Wait for state/save to complete
-    await waitFor(() => expect(screen.getByText(/updated/i)).toBeInTheDocument());
+    // Wait for state/save to complete and see update message
+    const updateMsg = await screen.findByTestId("mood-feedback");
+    expect(updateMsg.textContent).toMatch(/updated/i);
 
-    // re-render for update
+    // re-render for update scenario (button label should reflect state)
     render(
       <MoodProvider>
         <MoodInputForm />
@@ -50,12 +53,12 @@ describe("MoodInputForm", () => {
   it("does not submit if mood not selected", async () => {
     setup();
     fireEvent.click(screen.getByTestId("submit-mood-btn"));
-    // Feedback only shown on success, so should NOT find it
+    // Feedback only shown on success, so should NOT find feedback
     await waitFor(
       () => {
-        expect(screen.queryByText(/added/i)).not.toBeInTheDocument();
+        expect(screen.queryByTestId("mood-feedback")).not.toBeInTheDocument();
       },
-      { timeout: 800 } // shorter than form's setTimeout(1800), quick failure expected
+      { timeout: 800 }
     );
   });
 });
