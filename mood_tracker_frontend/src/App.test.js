@@ -49,28 +49,28 @@ describe("App integration & routing", () => {
     setupLocalStorageUser({ email: "bob@email.com", name: "bob" });
     renderWithRouter(<App />);
 
-    // navbar links
-    fireEvent.click(screen.getByRole("link", { name: /history/i }));
+    // navbar links using testid
+    fireEvent.click(screen.getByTestId("nav-history"));
     expect(screen.getByText(/mood history/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("link", { name: /charts/i }));
+    fireEvent.click(screen.getByTestId("nav-charts"));
     expect(screen.getByText(/visualizations/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("link", { name: /reminders/i }));
+    fireEvent.click(screen.getByTestId("nav-reminders"));
     expect(screen.getByText(/daily reminder/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("link", { name: /profile/i }));
+    fireEvent.click(screen.getByTestId("nav-profile"));
     expect(screen.getByText(/bob/i)).toBeInTheDocument();
-    expect(screen.getByText(/logout/i)).toBeInTheDocument();
+    expect(screen.getByTestId("profile-logout")).toBeInTheDocument();
   });
 
   test("logout removes user state and shows login view", () => {
     setupLocalStorageUser({ email: "jane@email.com", name: "jane" });
     renderWithRouter(<App />);
 
-    // open Profile, click logout
-    fireEvent.click(screen.getByRole("link", { name: /profile/i }));
-    fireEvent.click(screen.getByRole("button", { name: /logout/i }));
+    // open Profile using nav-profile, click logout by new testid
+    fireEvent.click(screen.getByTestId("nav-profile"));
+    fireEvent.click(screen.getByTestId("profile-logout"));
 
     expect(screen.getByRole("button", { name: /sign in/i })).toBeInTheDocument();
   });

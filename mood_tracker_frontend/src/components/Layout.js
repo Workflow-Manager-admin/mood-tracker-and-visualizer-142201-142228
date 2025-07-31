@@ -4,40 +4,61 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { OutlineButton, Avatar } from "./UI";
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * Navbar: main navigation header with mood app links.
+ */
 export function Navbar() {
   const { user, logout } = useAuth();
   return (
-    <div style={{
-      width: "100%",
-      background: COLORS.primary,
-      color: "#fff",
-      padding: "0.5rem 2rem",
-      height: "64px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      boxShadow: "0 2px 6px rgba(60,64,71,0.05)",
-      zIndex: 21,
-      position: "sticky",
-      top: 0,
-      left: 0
-    }}>
+    <div
+      data-testid="navbar"
+      style={{
+        width: "100%",
+        background: COLORS.primary,
+        color: "#fff",
+        padding: "0.5rem 2rem",
+        height: "64px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        boxShadow: "0 2px 6px rgba(60,64,71,0.05)",
+        zIndex: 21,
+        position: "sticky",
+        top: 0,
+        left: 0,
+      }}
+    >
       <div style={{ fontWeight: 700, fontSize: 22 }}>
         <Link to="/" style={{ color: "#fff", textDecoration: "none" }}>
           MoodTracker
         </Link>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "22px" }}>
-        <Link to="/" style={navLinkStyle}>Dashboard</Link>
-        <Link to="/history" style={navLinkStyle}>History</Link>
-        <Link to="/charts" style={navLinkStyle}>Charts</Link>
-        <Link to="/reminders" style={navLinkStyle}>Reminders</Link>
-        <Link to="/profile" style={navLinkStyle}>Profile</Link>
+      <div
+        style={{ display: "flex", alignItems: "center", gap: "22px" }}
+        data-testid="navbar-link-group"
+      >
+        <Link data-testid="nav-dashboard" to="/" style={navLinkStyle}>
+          Dashboard
+        </Link>
+        <Link data-testid="nav-history" to="/history" style={navLinkStyle}>
+          History
+        </Link>
+        <Link data-testid="nav-charts" to="/charts" style={navLinkStyle}>
+          Charts
+        </Link>
+        <Link data-testid="nav-reminders" to="/reminders" style={navLinkStyle}>
+          Reminders
+        </Link>
+        <Link data-testid="nav-profile" to="/profile" style={navLinkStyle}>
+          Profile
+        </Link>
         {user && (
           <>
-            <Avatar email={user.email} size={36} />
-            <OutlineButton onClick={logout}>Logout</OutlineButton>
+            <Avatar email={user.email} size={36} data-testid="navbar-avatar" />
+            <OutlineButton data-testid="navbar-logout" onClick={logout}>
+              Logout
+            </OutlineButton>
           </>
         )}
       </div>
@@ -80,9 +101,18 @@ export function Sidebar() {
 }
 
 function QuickActionItem({ to, label, icon, active }) {
+  // Map label (lowercase) to testid for deterministic testing
+  const validKeys = {
+    "Today": "sidebar-today",
+    "Visualize": "sidebar-visualize",
+    "History": "sidebar-history",
+    "Reminders": "sidebar-reminders",
+  };
+  const testId = validKeys[label] || undefined;
   return (
     <Link
       to={to}
+      data-testid={testId}
       style={{
         display: "flex",
         alignItems: "center",
@@ -93,8 +123,9 @@ function QuickActionItem({ to, label, icon, active }) {
         fontWeight: 600,
         textDecoration: "none",
         fontSize: 17,
-        gap: "15px"
-      }}>
+        gap: "15px",
+      }}
+    >
       <span>{icon}</span>
       {label}
     </Link>

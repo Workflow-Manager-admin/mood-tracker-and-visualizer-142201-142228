@@ -27,6 +27,7 @@ export default function ProfilePage() {
           <Button
             style={{ background: "#FFD600", color: "#282c34" }}
             onClick={logout}
+            data-testid="profile-logout"
           >
             Logout
           </Button>
