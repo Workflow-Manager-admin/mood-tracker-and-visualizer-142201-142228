@@ -26,7 +26,7 @@ describe("MoodInputForm", () => {
     // Wait for feedback with testid (reliably visible for at least 2.5s)
     const fb = await screen.findByTestId("mood-feedback");
     expect(fb).toBeInTheDocument();
-    expect(fb.textContent).toMatch(/added/i);
+    expect(fb.textContent).toBe("Mood added!");
   });
 
   it("renders 'update mood' if mood exists for today", async () => {
@@ -36,7 +36,7 @@ describe("MoodInputForm", () => {
     fireEvent.click(screen.getByTestId("submit-mood-btn"));
     // Wait for state/save to complete and see update message
     const updateMsg = await screen.findByTestId("mood-feedback");
-    expect(updateMsg.textContent).toMatch(/updated/i);
+    expect(updateMsg.textContent).toBe("Mood updated!");
 
     // re-render for update scenario (button label should reflect state)
     render(
