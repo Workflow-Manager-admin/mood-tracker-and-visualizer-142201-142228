@@ -11,15 +11,16 @@ export default function MoodInputForm() {
   const today = new Date().toISOString().slice(0, 10);
   const { addMood, getMoodByDate, editMood } = useMood();
 
-  // Always derive current today's mood directly from context
+  // Always derive current today's mood directly from context (live, not stale)
   const todayEntry = getMoodByDate(today);
 
-  // Form state: mood/note, initialized from today's mood if present, but always update on entry presence change
+  // Form state for mood/note, but button text is always driven by current context entry
   const [mood, setMood] = useState(todayEntry ? todayEntry.mood : "");
   const [note, setNote] = useState(todayEntry ? todayEntry.note : "");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // Rehydrate form state if todayEntry changes (so after context/localStorage hydration or remounts)
+  // Keep form fields always in sync with todayEntry from context,
+  // so after hydration/remounting the field reflects correct status.
   useEffect(() => {
     if (todayEntry) {
       setMood(todayEntry.mood);
@@ -29,11 +30,12 @@ export default function MoodInputForm() {
       setNote("");
     }
     // eslint-disable-next-line
-  }, [todayEntry && todayEntry.mood, todayEntry && todayEntry.note, today]);
+  }, [todayEntry?.mood, todayEntry?.note, today]);
 
   function handleSubmit(e) {
     e.preventDefault();
     if (!mood) return;
+    // Always re-check up-to-date context before writing
     const latest = getMoodByDate(today);
     if (latest) {
       editMood(today, { mood, note });
@@ -44,6 +46,9 @@ export default function MoodInputForm() {
     }
     setTimeout(() => setSuccessMsg(""), 2500);
   }
+
+  // Button label is always up to date with current context
+  const isTodayFilled = !!getMoodByDate(today);
 
   return (
     <form onSubmit={handleSubmit}>
@@ -69,7 +74,7 @@ export default function MoodInputForm() {
         style={{ marginTop: 10, width: "100%" }}
         data-testid="submit-mood-btn"
       >
-        {getMoodByDate(today) ? "Update Mood" : "Add Mood"}
+        {isTodayFilled ? "Update Mood" : "Add Mood"}
       </Button>
       {successMsg && (
         <div
