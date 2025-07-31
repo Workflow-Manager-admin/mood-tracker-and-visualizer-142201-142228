@@ -7,20 +7,30 @@ export const MoodContext = createContext();
 /**
  * Provides mood entries (add/edit), synchronized with localStorage.
  */
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * MoodProvider keeps mood state synchronized with localStorage. On every mount,
+ * rehydrates state from localStorage (if present), even after unmount/remount.
+ */
 export function MoodProvider({ children }) {
-  const [moods, setMoods] = useState([]);
+  const [moods, setMoods] = useState(() => {
+    // On initial mount, try to load from localStorage, else demo moods
+    const moodsJson = localStorage.getItem("moodtracker_moods");
+    if (moodsJson) return JSON.parse(moodsJson);
+    const demo = getDemoMoods();
+    localStorage.setItem("moodtracker_moods", JSON.stringify(demo));
+    return demo;
+  });
 
+  // On every mount (or remount), always rehydrate from localStorage
   useEffect(() => {
     const moodsJson = localStorage.getItem("moodtracker_moods");
     if (moodsJson) {
       setMoods(JSON.parse(moodsJson));
-    } else {
-      // Load demo data for initial state
-      const demo = getDemoMoods();
-      setMoods(demo);
-      localStorage.setItem("moodtracker_moods", JSON.stringify(demo));
     }
+    // Do not auto-fill demo on *re*-mount: only hydrate from localStorage for user data
+    // This acts as a safeguard if localStorage is cleared between mounts
+    // eslint-disable-next-line
   }, []);
 
   // PUBLIC_INTERFACE

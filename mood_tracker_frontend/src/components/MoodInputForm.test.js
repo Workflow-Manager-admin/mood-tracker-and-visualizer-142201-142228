@@ -48,11 +48,12 @@ describe("MoodInputForm", () => {
     // Unmount before next render to guarantee 1 form in DOM
     unmount1();
 
-    // Render a fresh form to verify only one exists (should be reset)
+    // Render a fresh form to verify only one exists, and context state is hydrated from localStorage
     const { unmount: unmount2 } = customRender();
     const btns = screen.getAllByTestId("submit-mood-btn");
     expect(btns.length).toBe(1);
     expect(btns[0]).toBeInTheDocument();
+    // Confirm that after remount, if today's mood is stored, the form shows "Update Mood" (verifies rehydration)
     expect(btns[0]).toHaveTextContent(/update mood/i);
     unmount2();
   });
