@@ -1,48 +1,51 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { MoodProvider } from "./contexts/MoodContext";
+import AuthPage from "./pages/AuthPage";
+import Dashboard from "./pages/Dashboard";
+import HistoryPage from "./pages/HistoryPage";
+import MoodChartsPage from "./pages/MoodChartsPage";
+import RemindersPage from "./pages/RemindersPage";
+import ProfilePage from "./pages/ProfilePage";
+import { Navbar, PageWrapper } from "./components/Layout";
 
 // PUBLIC_INTERFACE
 function App() {
-  const [theme, setTheme] = useState('light');
-
-  // Effect to apply theme to document element
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // PUBLIC_INTERFACE
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AuthProvider>
+      <MoodProvider>
+        <Router>
+          <AppRoutes />
+        </Router>
+      </MoodProvider>
+    </AuthProvider>
+  );
+}
+
+// Restrict main app routes to logged-in user
+function AppRoutes() {
+  const { user } = useAuth();
+  if (!user)
+    return (
+      <Routes>
+        <Route path="*" element={<AuthPage />} />
+      </Routes>
+    );
+  return (
+    <>
+      <Navbar />
+      <PageWrapper>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/history" element={<HistoryPage />} />
+          <Route path="/charts" element={<MoodChartsPage />} />
+          <Route path="/reminders" element={<RemindersPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </PageWrapper>
+    </>
   );
 }
 
