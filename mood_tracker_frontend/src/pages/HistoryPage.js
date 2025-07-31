@@ -57,11 +57,14 @@ export default function HistoryPage() {
                     <div style={{ fontSize: 13, color: "#757575" }}>{m.date}</div>
                     {m.note && <div style={{ fontSize: 13, marginTop: 2, color: "#616161" }}>Note: {m.note}</div>}
                   </div>
-                  <Button onClick={() => {
-                    setSelected(m.date);
-                    setEditValue(m.mood);
-                    setEditNote(m.note);
-                  }} style={{ background: "#FFD600", color: "#282c34", minWidth: 56 }}>
+                  <Button
+                    data-testid={`edit-btn-${m.date}`}
+                    onClick={() => {
+                      setSelected(m.date);
+                      setEditValue(m.mood);
+                      setEditNote(m.note);
+                    }}
+                    style={{ background: "#FFD600", color: "#282c34", minWidth: 56 }}>
                     Edit
                   </Button>
                 </div>
@@ -75,21 +78,26 @@ export default function HistoryPage() {
               Edit mood for <span style={{ color: "#6C63FF" }}>{selected}</span>
             </div>
             <Select
+              data-testid="edit-mood-select"
               options={MOOD_TYPES}
               value={editValue}
               onChange={e => setEditValue(e.target.value)}
             />
             <Input
+              data-testid="edit-note-input"
               type="text"
               value={editNote}
               onChange={e => setEditNote(e.target.value)}
               placeholder="Note"
             />
-            <Button onClick={() => handleEdit(selected)} style={{ marginTop: 8 }}>
+            <Button
+              data-testid="save-btn"
+              onClick={() => handleEdit(selected)} style={{ marginTop: 8 }}>
               Save
             </Button>
             {editSuccess && <div style={{ color: "#43E97B", fontSize: 13, marginTop: 5 }}>Saved!</div>}
             <Button
+              data-testid="cancel-btn"
               style={{ marginTop: 8, background: "#f4f4f4", color: "#757575" }}
               onClick={() => {
                 setSelected(null);

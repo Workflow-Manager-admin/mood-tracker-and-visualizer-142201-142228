@@ -26,11 +26,11 @@ describe("HistoryPage", () => {
     setup();
     expect(screen.getByText(/mood list/i)).toBeInTheDocument();
 
-    // Click edit
-    fireEvent.click(screen.getByRole("button", { name: /edit/i }));
-    fireEvent.change(screen.getByRole("combobox"), { target: { value: "sad" } });
-    fireEvent.change(screen.getByPlaceholderText(/note/i), { target: { value: "newnote" } });
-    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    // Click edit using testid, edit, save using testids
+    fireEvent.click(screen.getByTestId("edit-btn-2024-05-01"));
+    fireEvent.change(screen.getByTestId("edit-mood-select"), { target: { value: "sad" } });
+    fireEvent.change(screen.getByTestId("edit-note-input"), { target: { value: "newnote" } });
+    fireEvent.click(screen.getByTestId("save-btn"));
 
     expect(screen.getByText(/saved/i)).toBeInTheDocument();
   });
@@ -41,8 +41,8 @@ describe("HistoryPage", () => {
       JSON.stringify([{ date: "2024-05-01", mood: "calm", note: "" }])
     );
     setup();
-    fireEvent.click(screen.getByRole("button", { name: /edit/i }));
-    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+    fireEvent.click(screen.getByTestId("edit-btn-2024-05-01"));
+    fireEvent.click(screen.getByTestId("cancel-btn"));
     expect(screen.queryByText(/edit mood for/i)).not.toBeInTheDocument();
   });
 

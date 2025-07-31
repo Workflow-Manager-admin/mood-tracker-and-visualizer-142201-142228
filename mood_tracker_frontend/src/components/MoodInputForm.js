@@ -38,14 +38,20 @@ export default function MoodInputForm() {
         value={mood}
         onChange={e => setMood(e.target.value)}
         required
+        data-testid="mood-select"
       />
       <Input
         type="text"
         placeholder="Add a note (optional)"
         value={note}
         onChange={e => setNote(e.target.value)}
+        data-testid="mood-note-input"
       />
-      <Button type="submit" style={{ marginTop: 10, width: "100%" }}>
+      <Button
+        type="submit"
+        style={{ marginTop: 10, width: "100%" }}
+        data-testid="submit-mood-btn"
+      >
         {prev ? "Update Mood" : "Add Mood"}
       </Button>
       {success && (

@@ -20,17 +20,17 @@ describe("MoodInputForm", () => {
 
   it("renders input and submits for add mood", () => {
     setup();
-    fireEvent.change(screen.getByRole("combobox"), { target: { value: "happy" } });
-    fireEvent.change(screen.getByPlaceholderText(/note/i), { target: { value: "hello" } });
-    fireEvent.click(screen.getByRole("button", { name: /add mood/i }));
+    fireEvent.change(screen.getByTestId("mood-select"), { target: { value: "happy" } });
+    fireEvent.change(screen.getByTestId("mood-note-input"), { target: { value: "hello" } });
+    fireEvent.click(screen.getByTestId("submit-mood-btn"));
     expect(screen.queryByText(/added/i)).toBeInTheDocument();
   });
 
   it("renders 'update mood' if mood exists for today", () => {
     setup();
     // Add mood for today first
-    fireEvent.change(screen.getByRole("combobox"), { target: { value: "sad" } });
-    fireEvent.click(screen.getByRole("button", { name: /add mood/i }));
+    fireEvent.change(screen.getByTestId("mood-select"), { target: { value: "sad" } });
+    fireEvent.click(screen.getByTestId("submit-mood-btn"));
     // re-render for update
     render(
       <MoodProvider>
@@ -38,13 +38,14 @@ describe("MoodInputForm", () => {
       </MoodProvider>
     );
     expect(
-      screen.getByRole("button", { name: /update mood/i })
+      screen.getByTestId("submit-mood-btn")
     ).toBeInTheDocument();
+    expect(screen.getByTestId("submit-mood-btn")).toHaveTextContent(/update mood/i);
   });
 
   it("does not submit if mood not selected", () => {
     setup();
-    fireEvent.click(screen.getByRole("button", { name: /add mood/i }));
+    fireEvent.click(screen.getByTestId("submit-mood-btn"));
     // Feedback only shown on success, so not found
     expect(screen.queryByText(/added/i)).not.toBeInTheDocument();
   });
