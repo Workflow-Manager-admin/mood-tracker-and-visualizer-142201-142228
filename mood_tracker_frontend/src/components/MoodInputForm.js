@@ -11,31 +11,31 @@ export default function MoodInputForm() {
   const today = new Date().toISOString().slice(0, 10);
   const { addMood, getMoodByDate, editMood } = useMood();
 
-  // Use prevEntry to track if mood exists for today (controls button label)
-  const [prevEntry, setPrevEntry] = useState(() => getMoodByDate(today));
-  const [mood, setMood] = useState(prevEntry ? prevEntry.mood : "");
-  const [note, setNote] = useState(prevEntry ? prevEntry.note : "");
+  // Always derive current today's mood directly from context
+  const todayEntry = getMoodByDate(today);
+
+  // Form state: mood/note, initialized from today's mood if present, but always update on entry presence change
+  const [mood, setMood] = useState(todayEntry ? todayEntry.mood : "");
+  const [note, setNote] = useState(todayEntry ? todayEntry.note : "");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // Synchronize form state and prevEntry as mood data changes
+  // Rehydrate form state if todayEntry changes (so after context/localStorage hydration or remounts)
   useEffect(() => {
-    const todayMood = getMoodByDate(today);
-    setPrevEntry(todayMood);
-    if (todayMood) {
-      setMood(todayMood.mood);
-      setNote(todayMood.note);
+    if (todayEntry) {
+      setMood(todayEntry.mood);
+      setNote(todayEntry.note);
+    } else {
+      setMood("");
+      setNote("");
     }
-  // Only update if mood or date changes, ignore unnecessary deps
     // eslint-disable-next-line
-  }, [getMoodByDate, today]);
+  }, [todayEntry && todayEntry.mood, todayEntry && todayEntry.note, today]);
 
   function handleSubmit(e) {
     e.preventDefault();
     if (!mood) return;
     const latest = getMoodByDate(today);
     if (latest) {
-      // If mood or note differs, update;
-      // Always allow update to trigger for test/UX even if they're same
       editMood(today, { mood, note });
       setSuccessMsg("Mood updated!");
     } else {
