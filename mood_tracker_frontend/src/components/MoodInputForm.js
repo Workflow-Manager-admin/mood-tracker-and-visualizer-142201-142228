@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useMood } from "../contexts/MoodContext";
 import { Button, Select, Input } from "./UI";
 import { MOOD_TYPES } from "../utils/moodUtils";
@@ -11,15 +11,32 @@ export default function MoodInputForm() {
   const today = new Date().toISOString().slice(0, 10);
   const { addMood, getMoodByDate, editMood } = useMood();
 
-  const prev = getMoodByDate(today);
+  // Ensure prev value always reflects the latest state after add/edit
+  const [prev, setPrev] = useState(() => getMoodByDate(today));
   const [mood, setMood] = useState(prev ? prev.mood : "");
   const [note, setNote] = useState(prev ? prev.note : "");
   const [successMsg, setSuccessMsg] = useState("");
 
+  // Whenever moods context changes, recompute "prev" and update form fields if needed
+  useEffect(() => {
+    const todayMood = getMoodByDate(today);
+    setPrev(todayMood);
+
+    // If today's mood entry changed (added/updated), update field values accordingly.
+    if (todayMood) {
+      setMood(todayMood.mood);
+      setNote(todayMood.note);
+    } else {
+      setMood("");
+      setNote("");
+    }
+  }, [getMoodByDate, today]);
+
   function handleSubmit(e) {
     e.preventDefault();
     if (!mood) return;
-    if (prev) {
+    const latest = getMoodByDate(today);
+    if (latest) {
       editMood(today, { mood, note });
       setSuccessMsg("Mood updated!");
     } else {
