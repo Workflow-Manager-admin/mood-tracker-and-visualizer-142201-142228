@@ -9,7 +9,7 @@ import { getMoodMeta, MOOD_TYPES } from "../utils/moodUtils";
  */
 export default function HistoryPage() {
   const { moods, editMood, getMoodByDate } = useMood();
-  const sortedMoods = [...moods].sort((a, b) => b.date.localeCompare(a.date));
+  const sortedMoods = Array.isArray(moods) ? [...moods].sort((a, b) => b.date.localeCompare(a.date)) : [];
   const [selected, setSelected] = useState(null);
   const selectedMood = selected ? getMoodByDate(selected) : null;
 
