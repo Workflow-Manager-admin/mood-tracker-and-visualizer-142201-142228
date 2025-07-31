@@ -11,6 +11,12 @@ function clearLocalStorageUser() {
   window.localStorage.removeItem("moodtracker_user");
 }
 
+function renderWithRouter(ui, initialEntries = ["/"]) {
+  return render(
+    <MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>
+  );
+}
+
 describe("App integration & routing", () => {
   afterEach(() => {
     clearLocalStorageUser();
@@ -18,13 +24,13 @@ describe("App integration & routing", () => {
   });
 
   test("redirects to AuthPage if not logged in", () => {
-    render(<App />, { wrapper: MemoryRouter });
+    renderWithRouter(<App />);
     expect(screen.getByText(/MoodTracker/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /sign in/i })).toBeInTheDocument();
   });
 
   test("routing - shows Dashboard after login", () => {
-    render(<App />, { wrapper: MemoryRouter });
+    renderWithRouter(<App />);
     fireEvent.change(screen.getByPlaceholderText(/email/i), {
       target: { value: "test@email.com" },
     });
@@ -41,7 +47,7 @@ describe("App integration & routing", () => {
 
   test("full navigation bar can route to all main pages after login", () => {
     setupLocalStorageUser({ email: "bob@email.com", name: "bob" });
-    render(<App />, { wrapper: MemoryRouter });
+    renderWithRouter(<App />);
 
     // navbar links
     fireEvent.click(screen.getByRole("link", { name: /history/i }));
@@ -60,7 +66,7 @@ describe("App integration & routing", () => {
 
   test("logout removes user state and shows login view", () => {
     setupLocalStorageUser({ email: "jane@email.com", name: "jane" });
-    render(<App />, { wrapper: MemoryRouter });
+    renderWithRouter(<App />);
 
     // open Profile, click logout
     fireEvent.click(screen.getByRole("link", { name: /profile/i }));

@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { MoodProvider } from "./contexts/MoodContext";
 import AuthPage from "./pages/AuthPage";
@@ -12,12 +12,12 @@ import { Navbar, PageWrapper } from "./components/Layout";
 
 // PUBLIC_INTERFACE
 function App() {
+  // The Router is now expected to be provided at a higher level (index.js or test)
+  // This avoids nested routers in integration tests and elsewhere.
   return (
     <AuthProvider>
       <MoodProvider>
-        <Router>
-          <AppRoutes />
-        </Router>
+        <AppRoutes />
       </MoodProvider>
     </AuthProvider>
   );
