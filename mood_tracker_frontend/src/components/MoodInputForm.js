@@ -15,12 +15,13 @@ export default function MoodInputForm() {
   const todayEntry = getMoodByDate(today);
 
   // Form state for mood/note, but button text is always driven by current context entry
-  const [mood, setMood] = useState(todayEntry ? todayEntry.mood : "");
-  const [note, setNote] = useState(todayEntry ? todayEntry.note : "");
+  const [mood, setMood] = useState("");
+  const [note, setNote] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  // Track the last known mood existence for today to force re-render if context restored
+  const [isTodayFilled, setIsTodayFilled] = useState(!!todayEntry);
 
-  // Keep form fields always in sync with todayEntry from context,
-  // so after hydration/remounting the field reflects correct status.
+  // Always keep form fields and button label in sync with current context, especially after hydration/remount
   useEffect(() => {
     if (todayEntry) {
       setMood(todayEntry.mood);
@@ -29,8 +30,16 @@ export default function MoodInputForm() {
       setMood("");
       setNote("");
     }
+    setIsTodayFilled(!!todayEntry);
+    // We watch todayEntry as a whole so hydration (object) changes are picked up
     // eslint-disable-next-line
-  }, [todayEntry?.mood, todayEntry?.note, today]);
+  }, [todayEntry, today]);
+
+  // When localStorage is explicitly restored (rare), ensure button label is correct even if form fields are unchanged
+  useEffect(() => {
+    setIsTodayFilled(!!todayEntry);
+    // eslint-disable-next-line
+  }, [todayEntry, today]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -45,10 +54,9 @@ export default function MoodInputForm() {
       setSuccessMsg("Mood added!");
     }
     setTimeout(() => setSuccessMsg(""), 2500);
+    // After submit, ensure button re-syncs with latest context
+    setIsTodayFilled(!!getMoodByDate(today));
   }
-
-  // Button label is always up to date with current context
-  const isTodayFilled = !!getMoodByDate(today);
 
   return (
     <form onSubmit={handleSubmit}>
