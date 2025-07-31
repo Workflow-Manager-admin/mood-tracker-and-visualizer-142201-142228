@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Card, Button, Input } from "../components/UI";
 import { COLORS } from "../constants/theme";
 
@@ -10,18 +10,31 @@ export default function RemindersPage() {
   const [enabled, setEnabled] = useState(false);
   const [time, setTime] = useState("09:00");
 
+  // Load from localStorage once at mount
   useEffect(() => {
     const rjson = localStorage.getItem("moodtracker_reminder");
     if (rjson) {
-      const { enabled: e, time: t } = JSON.parse(rjson);
-      setEnabled(e);
-      setTime(t);
+      try {
+        const { enabled: e, time: t } = JSON.parse(rjson);
+        setEnabled(Boolean(e));
+        setTime(typeof t === "string" ? t : "09:00");
+      } catch { /* ignore malformed json */ }
     }
   }, []);
 
-  function save() {
+  // Persist changes to localStorage whenever enabled or time changes
+  useEffect(() => {
     localStorage.setItem("moodtracker_reminder", JSON.stringify({ enabled, time }));
-  }
+  }, [enabled, time]);
+
+  // Handlers
+  const handleEnableChange = useCallback((e) => {
+    setEnabled(e.target.checked);
+  }, []);
+
+  const handleTimeChange = useCallback((e) => {
+    setTime(e.target.value);
+  }, []);
 
   return (
     <Card style={{ maxWidth: 360, margin: "0 auto" }}>
@@ -35,7 +48,7 @@ export default function RemindersPage() {
         <input
           type="checkbox"
           checked={enabled}
-          onChange={e => { setEnabled(e.target.checked); save(); }}
+          onChange={handleEnableChange}
           style={{ accentColor: COLORS.primary, width: 19, height: 19 }}
         />
         <span style={{ fontWeight: 500, color: enabled ? COLORS.primary : "#757575" }}>Enable Reminder</span>
@@ -47,10 +60,7 @@ export default function RemindersPage() {
             id="reminder-time"
             type="time"
             value={time}
-            onChange={e => {
-              setTime(e.target.value);
-              save();
-            }}
+            onChange={handleTimeChange}
             style={{ width: 130, display: "inline-block", marginLeft: 12 }}
             min="00:00"
             max="23:59"

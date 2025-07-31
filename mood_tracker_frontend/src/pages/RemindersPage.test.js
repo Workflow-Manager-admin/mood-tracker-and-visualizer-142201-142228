@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import RemindersPage from "./RemindersPage";
 
 // Utility: normalize a color string to hex (for style attribute assertions)
@@ -31,29 +31,45 @@ function normalizeColor(colorString) {
 describe("RemindersPage", () => {
   beforeEach(() => window.localStorage.clear());
 
-  it("renders and toggles reminder", () => {
+  it("renders and toggles reminder", async () => {
     render(<RemindersPage />);
     expect(screen.getByText(/daily reminder/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("checkbox"));
-    // Check that the color style of Enable Reminder is updated to primary
-    const enableLabel = screen.getByText(/enable reminder/i);
-    const color = enableLabel.style.color || window.getComputedStyle(enableLabel).color;
-    const norm = normalizeColor(color);
-    expect(norm === "#6C63FF" || color.includes("108") || /6C63FF/i.test(color)).toBe(true);
-    // Save state
-    expect(JSON.parse(window.localStorage.getItem("moodtracker_reminder"))).toBeTruthy();
+    // Wait for DOM update (React flush/effect may be batched)
+    await waitFor(() => {
+      // Check that the color style of Enable Reminder is updated to primary
+      const enableLabel = screen.getByText(/enable reminder/i);
+      const color = enableLabel.style.color || window.getComputedStyle(enableLabel).color;
+      const norm = normalizeColor(color);
+      expect(norm === "#6C63FF" || color.includes("108") || /6C63FF/i.test(color)).toBe(
+        true
+      );
+    });
+
+    // Save state in localStorage (wait for update)
+    await waitFor(() =>
+      expect(JSON.parse(window.localStorage.getItem("moodtracker_reminder"))).toBeTruthy()
+    );
   });
 
-  it("sets and updates reminder time", () => {
+  it("sets and updates reminder time", async () => {
     render(<RemindersPage />);
     fireEvent.click(screen.getByRole("checkbox"));
-    expect(screen.getByLabelText(/reminder time/i)).toBeInTheDocument();
+
+    // Wait for the "reminder time" input to appear
+    await waitFor(() =>
+      expect(screen.getByLabelText(/reminder time/i)).toBeInTheDocument()
+    );
 
     fireEvent.change(screen.getByLabelText(/reminder time/i), { target: { value: "15:40" } });
-    const rem = JSON.parse(window.localStorage.getItem("moodtracker_reminder"));
-    expect(rem.time).toBe("15:40");
-    expect(rem.enabled).toBe(true);
+
+    // Wait for localStorage to reflect new time value
+    await waitFor(() => {
+      const rem = JSON.parse(window.localStorage.getItem("moodtracker_reminder"));
+      expect(rem.time).toBe("15:40");
+      expect(rem.enabled).toBe(true);
+    });
   });
 
   it("shows Reminders off if not enabled", () => {
