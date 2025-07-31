@@ -43,17 +43,20 @@ describe("MoodInputForm", () => {
     fireEvent.click(screen.getByTestId("submit-mood-btn"));
     const fbUpdate = await screen.findByTestId("mood-feedback");
     expect(fbUpdate.textContent).toBe("Mood updated!");
-    
-    // re-render to check button label now shows 'Update Mood'
-    render(
+
+    // Unmount previous render to avoid multiple forms in DOM
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    const { unmount, container } = render(
       <MoodProvider>
         <MoodInputForm />
       </MoodProvider>
     );
-    // Button should show "Update Mood"
-    const btn = await screen.findByTestId("submit-mood-btn");
-    expect(btn).toBeInTheDocument();
-    expect(btn).toHaveTextContent(/update mood/i);
+    // Now only one form (and one submit-mood-btn) present
+    const btns = screen.getAllByTestId("submit-mood-btn");
+    expect(btns.length).toBe(1);
+    expect(btns[0]).toBeInTheDocument();
+    expect(btns[0]).toHaveTextContent(/update mood/i);
+    unmount();
   });
 
   it("does not submit if mood not selected", async () => {
