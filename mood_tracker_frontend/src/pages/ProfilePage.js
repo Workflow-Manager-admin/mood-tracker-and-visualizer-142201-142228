@@ -17,7 +17,10 @@ export default function ProfilePage() {
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
           <Avatar email={user.email} size={54} />
           <div>
-            <div style={{ fontWeight: 700, fontSize: 19, color: "#6C63FF" }}>
+            <div
+              style={{ fontWeight: 700, fontSize: 19, color: "#6C63FF" }}
+              data-testid="profile-username"
+            >
               {user.name}
             </div>
             <div style={{ fontSize: 14, color: "#616161" }}>{user.email}</div>
