@@ -29,16 +29,22 @@ describe("MoodInputForm", () => {
     expect(fb.textContent).toBe("Mood added!");
   });
 
-  it("renders 'update mood' if mood exists for today", async () => {
+  it("after adding mood for today, re-submitting triggers 'Mood updated!'", async () => {
     setup();
-    // Add mood for today first
+    // Submit today's mood (adds)
     fireEvent.change(screen.getByTestId("mood-select"), { target: { value: "sad" } });
+    fireEvent.change(screen.getByTestId("mood-note-input"), { target: { value: "test" } });
     fireEvent.click(screen.getByTestId("submit-mood-btn"));
-    // Wait for state/save to complete and see update message
-    const updateMsg = await screen.findByTestId("mood-feedback");
-    expect(updateMsg.textContent).toBe("Mood updated!");
+    // Wait for add confirmation
+    const fbAdd = await screen.findByTestId("mood-feedback");
+    expect(fbAdd.textContent).toBe("Mood added!");
 
-    // re-render for update scenario (button label should reflect state)
+    // Immediately submit again (should update and show updated message)
+    fireEvent.click(screen.getByTestId("submit-mood-btn"));
+    const fbUpdate = await screen.findByTestId("mood-feedback");
+    expect(fbUpdate.textContent).toBe("Mood updated!");
+    
+    // re-render to check button label now shows 'Update Mood'
     render(
       <MoodProvider>
         <MoodInputForm />

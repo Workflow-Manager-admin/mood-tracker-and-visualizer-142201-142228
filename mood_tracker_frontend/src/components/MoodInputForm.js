@@ -11,25 +11,22 @@ export default function MoodInputForm() {
   const today = new Date().toISOString().slice(0, 10);
   const { addMood, getMoodByDate, editMood } = useMood();
 
-  // Ensure prev value always reflects the latest state after add/edit
-  const [prev, setPrev] = useState(() => getMoodByDate(today));
-  const [mood, setMood] = useState(prev ? prev.mood : "");
-  const [note, setNote] = useState(prev ? prev.note : "");
+  // Use prevEntry to track if mood exists for today (controls button label)
+  const [prevEntry, setPrevEntry] = useState(() => getMoodByDate(today));
+  const [mood, setMood] = useState(prevEntry ? prevEntry.mood : "");
+  const [note, setNote] = useState(prevEntry ? prevEntry.note : "");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // Whenever moods context changes, recompute "prev" and update form fields if needed
+  // Synchronize form state and prevEntry as mood data changes
   useEffect(() => {
     const todayMood = getMoodByDate(today);
-    setPrev(todayMood);
-
-    // If today's mood entry changed (added/updated), update field values accordingly.
+    setPrevEntry(todayMood);
     if (todayMood) {
       setMood(todayMood.mood);
       setNote(todayMood.note);
-    } else {
-      setMood("");
-      setNote("");
     }
+  // Only update if mood or date changes, ignore unnecessary deps
+    // eslint-disable-next-line
   }, [getMoodByDate, today]);
 
   function handleSubmit(e) {
@@ -37,13 +34,14 @@ export default function MoodInputForm() {
     if (!mood) return;
     const latest = getMoodByDate(today);
     if (latest) {
+      // If mood or note differs, update;
+      // Always allow update to trigger for test/UX even if they're same
       editMood(today, { mood, note });
       setSuccessMsg("Mood updated!");
     } else {
       addMood({ date: today, mood, note });
       setSuccessMsg("Mood added!");
     }
-    // Keep message visible for at least 2.5s for reliable test feedback
     setTimeout(() => setSuccessMsg(""), 2500);
   }
 
@@ -71,7 +69,7 @@ export default function MoodInputForm() {
         style={{ marginTop: 10, width: "100%" }}
         data-testid="submit-mood-btn"
       >
-        {prev ? "Update Mood" : "Add Mood"}
+        {getMoodByDate(today) ? "Update Mood" : "Add Mood"}
       </Button>
       {successMsg && (
         <div
